@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vordergrund des adaptiven Symbols: einfarbige Fassung für Themen-Symbole (Android 13+). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:translateX="22" android:translateY="42.78" android:scaleX="0.2432" android:scaleY="0.2432">
+        <path android:fillColor="#FF000000" android:pathData="M79.9,0h14.1v12.48h-14.1zM136.28,21.66 L136.28,24.97 L136.28,67.26 L150.38,67.26 L150.38,24.97 L164.48,24.97 L164.48,12.49 L136.28,12.49 L136.28,21.66zM79.9,24.97h14.1v42.28h-14.1zM206.76,79.76h28.2v12.48h-28.2zM164.48,37.46 L178.58,37.46 L178.58,67.26 L192.68,67.26 L192.68,37.46 L192.68,34.15 L192.68,24.97 L164.48,24.97 L164.48,37.46zM108.1,24.97h14.1v42.28h-14.1zM263.16,12.49 L249.06,12.49 L249.06,67.26 L234.96,67.26 L234.96,54.77 L220.86,54.77 L220.86,12.49 L206.76,12.49 L206.76,54.77 L206.76,58.08 L206.76,67.26 L234.96,67.26 L234.96,79.74 L249.06,79.74 L249.06,67.26 L263.16,67.26 L263.16,12.49zM108.1,0h14.1v12.48h-14.1zM0,0 L0,12.48 L2.59,12.48 L28.2,12.48 L28.2,0 L2.59,0 L0,0zM42.3,0 L42.3,12.48 L67.91,12.48 L70.5,12.48 L70.5,0 L67.91,0 L42.3,0zM28.2,12.49h14.1v54.77h-14.1z" />
+    </group>
+</vector>

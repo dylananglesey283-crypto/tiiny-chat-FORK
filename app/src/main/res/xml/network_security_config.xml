@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Das Tiiny spricht nur unverschlüsseltes HTTP (vom Nutzer akzeptiert).
+     Klartext ist deshalb erlaubt; die App spricht ausschliesslich die
+     konfigurierte Basisadresse an. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
