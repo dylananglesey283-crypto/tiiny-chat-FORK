@@ -7,6 +7,8 @@ as a personal client for a Google Pixel 8 Pro running GrapheneOS (Android 17).
 **This is not an official Tiiny app.** It has no Google, Firebase or analytics libraries and
 sends no telemetry.
 
+**It is 100% AI generated. This app has not been checked for malicious content by a professional developer; use at your own risk!**
+
 ## Features
 
 - **Ad-hoc chat** on the start screen (kept in memory only; can be saved into a project).
