@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import io.github.jenziner.nisaba.core.store.ProjectRef
 import io.github.jenziner.nisaba.ui.ChatScreen
+import io.github.jenziner.nisaba.ui.DashboardScreen
 import io.github.jenziner.nisaba.ui.DiagnosticsScreen
 import io.github.jenziner.nisaba.ui.NisabaTheme
 import io.github.jenziner.nisaba.ui.ProjectScreen
@@ -28,6 +29,8 @@ import io.github.jenziner.nisaba.ui.ProjectSettingsScreen
 sealed interface Screen {
     /** Startansicht = Ad-hoc-Chat mit Menü. */
     data object Home : Screen
+    /** TV start screen: status overview, tiles and projects. */
+    data object Dashboard : Screen
     data object Settings : Screen
     data object Diagnostics : Screen
     data class Project(val ref: ProjectRef) : Screen
@@ -63,10 +66,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun Root() {
-    val stack = remember { mutableStateListOf<Screen>(Screen.Home) }
+    val tv = LocalIsTv.current
+    val stack = remember { mutableStateListOf<Screen>(if (tv) Screen.Dashboard else Screen.Home) }
     val nav = remember { Nav(stack) }
     Box(if (LocalIsTv.current) Modifier.padding(TvSafePadding) else Modifier) {
     when (val s = nav.top) {
+        Screen.Dashboard -> DashboardScreen(nav)
         Screen.Home -> HomeScreen(nav)
         Screen.Settings -> SettingsScreen(nav)
         Screen.Diagnostics -> DiagnosticsScreen(nav)

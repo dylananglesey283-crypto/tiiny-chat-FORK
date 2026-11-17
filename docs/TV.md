@@ -8,6 +8,9 @@ The app installs and starts on Android TV / Google TV (it also still runs on pho
   `drawable/tv_banner`). Touchscreen and leanback are declared optional.
 - **Remote control:** every clickable row shows a visible focus ring; the **Menu** button opens
   the project drawer on the start screen. **Back** goes back as before.
+- **Dashboard:** on a TV the app opens on a dashboard instead of the chat: cards for model,
+  network, storage and activity, tiles for Chat / New chat / Check connection / Settings /
+  Diagnostics, and the project list. Back from the chat returns to it.
 - **Safe area:** on a TV the content keeps a margin (48 dp / 27 dp) from the screen edge.
 - **Storage:** most TVs have no folder picker, so *Settings → Project storage → Use app storage*
   keeps projects in the app's own folder (`Android/data/<package>/files/projects`). Uses the same
