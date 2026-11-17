@@ -37,12 +37,15 @@ the banner.
   key sent) and lists hosts that answer like an OpenAI-compatible server. Selecting one sets the
   base address and switches to the system network. Needs the local network permission on
   Android 17.
-- **Wake Tiiny** (dashboard tile): sends a Wake-on-LAN magic packet (UDP broadcast, ports 9 and 7)
-  to the MAC address saved under Find Tiiny, then checks the connection for about a minute.
-  Android does not let apps read other devices' MAC addresses, so you enter it once (shown on the
-  Tiiny or in your router's device list).
-- Limits: only works if the Tiiny supports Wake-on-LAN, has it switched on, and is on the same
-  network, usually over Ethernet. Only /24 networks are scanned. Not tested with a real Tiiny.
+- **Power on** (dashboard tile): the Tiiny has no Ethernet port, so Wake-on-LAN is not possible.
+  Instead, plug its USB-C charger into a Wi-Fi smart plug that has a local web API (for example a
+  Shelly Plus Plug UK or a Tasmota plug) and save the plug's "turn on" address under Find Tiiny.
+  The tile calls that address, then checks the connection for about two minutes. Examples:
+  Shelly Plus/Gen2+ `http://<plug-ip>/rpc/Switch.Set?id=0&on=true`, Shelly Gen1
+  `http://<plug-ip>/relay/0?turn=on`, Tasmota `http://<plug-ip>/cm?cmnd=Power%20On`.
+- Limits: this relies on the Tiiny booting by itself when power returns (reported, not verified
+  here). It only switches ON; shut the Tiiny down on the device, because cutting power can damage
+  its storage. Only /24 networks are scanned. Not tested with a real Tiiny or plug.
 
 ## Getting it onto a TV
 

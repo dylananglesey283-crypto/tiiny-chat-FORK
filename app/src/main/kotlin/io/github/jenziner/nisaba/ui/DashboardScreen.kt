@@ -134,12 +134,12 @@ fun DashboardScreen(nav: Nav) {
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Tile(R.drawable.ic_search, "Find Tiiny", enabled = true) { nav.push(Screen.Find) }
-                Tile(R.drawable.ic_power, "Wake Tiiny", enabled = !waking && LanTools.parseMac(settings.wolMac) != null) {
+                Tile(R.drawable.ic_power, "Power on", enabled = !waking && LanTools.isHttpUrl(settings.powerOnUrl)) {
                     waking = true; wakeMsg = "Sending …"
-                    scope.launch { wakeMsg = wakeAndWatch(g, settings.wolMac); waking = false }
+                    scope.launch { wakeMsg = powerOnAndWatch(g, settings.powerOnUrl); waking = false }
                 }
             }
-            if (settings.wolMac.isBlank()) Hint("Wake Tiiny needs the Tiiny's MAC address: open Find Tiiny to enter it.")
+            if (settings.powerOnUrl.isBlank()) Hint("Power on needs your smart plug's turn-on address: open Find Tiiny to enter it.")
             wakeMsg?.let { Hint(it) }
 
             SectionTitle("Projects")

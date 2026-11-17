@@ -10,7 +10,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.net.Inet4Address
 import java.net.HttpURLConnection
 import java.net.URL
@@ -22,8 +21,6 @@ data class FoundDevice(
     val model: String?,
     /** True when the host answered 401/403 JSON: it is probably the Tiiny, but needs the API key. */
     val needsKey: Boolean,
-    /** MAC from the ARP table, if Android lets the app read it (often it does not). */
-    val mac: String?,
 )
 
 /**
@@ -41,20 +38,16 @@ class Discovery(private val context: Context) {
         return lp.linkAddresses.map { it.address }.filterIsInstance<Inet4Address>().firstOrNull()?.address
     }
 
-    /** Broadcast address of the default network's /24, for Wake-on-LAN. */
-    fun broadcast(): String? = ownAddress()?.let(LanTools::broadcast24)
-
     suspend fun scan(onProgress: (done: Int, total: Int) -> Unit): List<FoundDevice> {
         val own = ownAddress() ?: return emptyList()
         val hosts = LanTools.scanHosts(own)
         val gate = Semaphore(48)
         var done = 0
-        val arp = readArp()
         return withContext(Dispatchers.IO) {
             coroutineScope {
                 hosts.map { h ->
                     async {
-                        val r = gate.withPermit { probe(h, arp[h]) }
+                        val r = gate.withPermit { probe(h) }
                         synchronized(this@Discovery) { done++; onProgress(done, hosts.size) }
                         r
                     }
@@ -63,7 +56,7 @@ class Discovery(private val context: Context) {
         }
     }
 
-    private fun probe(host: String, mac: String?): FoundDevice? = try {
+    private fun probe(host: String): FoundDevice? = try {
         val c = URL("http://$host/v1/models").openConnection() as HttpURLConnection
         c.connectTimeout = 400
         c.readTimeout = 800
@@ -74,19 +67,11 @@ class Discovery(private val context: Context) {
             val body = (if (code in 200..299) c.inputStream else c.errorStream)?.use { it.readNBytes(16_384).toString(Charsets.UTF_8) }.orEmpty()
             when {
                 code in 200..299 && LanTools.looksLikeModelList(body) ->
-                    FoundDevice(host, "http://$host/v1", LanTools.firstModelId(body), needsKey = false, mac = mac)
+                    FoundDevice(host, "http://$host/v1", LanTools.firstModelId(body), needsKey = false)
                 (code == 401 || code == 403) && type.contains("json", ignoreCase = true) ->
-                    FoundDevice(host, "http://$host/v1", null, needsKey = true, mac = mac)
+                    FoundDevice(host, "http://$host/v1", null, needsKey = true)
                 else -> null
             }
         } finally { c.disconnect() }
     } catch (_: Exception) { null }
-
-    /** Best effort: Android 10+ usually hides /proc/net/arp from apps, then this is just empty. */
-    private fun readArp(): Map<String, String> = runCatching {
-        File("/proc/net/arp").readLines().drop(1).mapNotNull { line ->
-            val p = line.trim().split(Regex("\\s+"))
-            if (p.size >= 4 && p[3] != "00:00:00:00:00:00" && LanTools.parseMac(p[3]) != null) p[0] to p[3].uppercase() else null
-        }.toMap()
-    }.getOrDefault(emptyMap())
 }

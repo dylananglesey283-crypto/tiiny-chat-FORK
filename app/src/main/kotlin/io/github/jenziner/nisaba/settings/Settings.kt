@@ -35,8 +35,8 @@ data class AppSettings(
      * Gilt nur, wenn das Modell keine Kontextgrösse meldet.
      */
     val documentLimitTokens: Int = DEFAULT_DOCUMENT_LIMIT,
-    /** Wake-on-LAN: MAC address of the Tiiny (any common notation), empty = not set. */
-    val wolMac: String = "",
+    /** URL that switches on the smart plug the Tiiny is powered from; empty = not set. */
+    val powerOnUrl: String = "",
 ) {
     companion object {
         const val DEFAULT_BASE_URL = "http://172.19.178.109/v1"
@@ -73,7 +73,7 @@ class SettingsRepository(context: Context) {
         webSearch = prefs.getBoolean(K_WEB, false),
         searchEngine = prefs.getString(K_ENGINE, null) ?: AppSettings.SEARCH_AUTO,
         documentLimitTokens = prefs.getInt(K_DOC_LIMIT, AppSettings.DEFAULT_DOCUMENT_LIMIT).takeIf { it > 0 } ?: AppSettings.DEFAULT_DOCUMENT_LIMIT,
-        wolMac = prefs.getString(K_WOL_MAC, null) ?: "",
+        powerOnUrl = prefs.getString(K_POWER_URL, null) ?: "",
     )
 
     fun update(f: (AppSettings) -> AppSettings) {
@@ -90,7 +90,7 @@ class SettingsRepository(context: Context) {
             .putBoolean(K_WEB, n.webSearch)
             .putString(K_ENGINE, n.searchEngine)
             .putInt(K_DOC_LIMIT, n.documentLimitTokens)
-            .putString(K_WOL_MAC, n.wolMac)
+            .putString(K_POWER_URL, n.powerOnUrl)
             .apply()
         _state.value = n
     }
@@ -108,6 +108,6 @@ class SettingsRepository(context: Context) {
         const val K_SEARX_OLD = "searxng_adresse"
         const val K_ENGINE = "suchmaschine"
         const val K_DOC_LIMIT = "dokumentgrenze_tokens"
-        const val K_WOL_MAC = "wol_mac"
+        const val K_POWER_URL = "power_on_url"
     }
 }

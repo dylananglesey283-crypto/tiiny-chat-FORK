@@ -38,25 +38,22 @@ fun FindScreen(nav: Nav) {
 }
 
 /**
- * Sends the Wake-on-LAN packet, then checks the connection every 5 s for about a minute so the
- * dashboard turns green once the Tiiny is up. Returns the message to show.
+ * Calls the saved smart-plug URL, then checks the connection every 5 s for about two minutes so
+ * the dashboard turns green once the Tiiny has booted. Returns the message to show.
  */
-suspend fun wakeAndWatch(g: AppGraph, mac: String): String {
-    val r = g.wol.send(mac)
-    val msg = r.fold({ "$it. The Tiiny can take a minute to start." }, { "Not sent: ${it.message}" })
-    if (r.isSuccess) {
-        repeat(12) {
-            delay(5000)
-            g.refreshModels("wake", quiet = true)
-            delay(1500)
-            if (g.modelStatus.value is ModelStatus.Ok) return "The Tiiny is awake and answering."
-        }
-        return "Packet sent, but the Tiiny is not answering yet. Is Wake-on-LAN switched on for it?"
+suspend fun powerOnAndWatch(g: AppGraph, url: String): String {
+    val r = g.plug.turnOn(url)
+    if (r.isFailure) return "Not switched on: ${r.exceptionOrNull()?.message}"
+    repeat(24) {
+        delay(5000)
+        g.refreshModels("power-on", quiet = true)
+        delay(1500)
+        if (g.modelStatus.value is ModelStatus.Ok) return "The Tiiny is on and answering."
     }
-    return msg
+    return "The plug switched on, but the Tiiny is not answering yet. It may still be booting."
 }
 
-/** Find the Tiiny on the network and wake it with Wake-on-LAN. */
+/** Find the Tiiny on the network and power it on through a smart plug. */
 @Composable
 fun FindSection(showPermission: Boolean = true) {
     val g = LocalContext.current.graph
@@ -66,9 +63,9 @@ fun FindSection(showPermission: Boolean = true) {
     var progress by remember { mutableIntStateOf(0) }
     var found by remember { mutableStateOf<List<FoundDevice>?>(null) }
     var applied by remember { mutableStateOf<String?>(null) }
-    var macInput by remember { mutableStateOf(s.wolMac) }
-    var wolMsg by remember { mutableStateOf<String?>(null) }
-    var waking by remember { mutableStateOf(false) }
+    var urlInput by remember { mutableStateOf(s.powerOnUrl) }
+    var powerMsg by remember { mutableStateOf<String?>(null) }
+    var powering by remember { mutableStateOf(false) }
 
     SectionTitle("Find the Tiiny")
     if (showPermission) LocalNetworkPermission()
@@ -83,27 +80,18 @@ fun FindSection(showPermission: Boolean = true) {
     }) { Ico(io.github.jenziner.nisaba.R.drawable.ic_search, null); Text(if (scanning) "  Searching … $progress%" else "  Search network") }
 
     found?.let { list ->
-        if (list.isEmpty()) Hint("Nothing found. Is the Tiiny on and on the same network? On a TV set Network path to System network.")
+        if (list.isEmpty()) Hint("Nothing found. Is the Tiiny on and on the same Wi-Fi? On a TV set Network path to System network.")
         list.forEach { d ->
             Row(
                 Modifier.fillMaxWidth().focusClickable {
-                    g.settings.update {
-                        it.copy(
-                            baseUrl = d.baseUrl, networkMode = NetworkMode.SYSTEM,
-                            wolMac = if (it.wolMac.isBlank() && d.mac != null) d.mac else it.wolMac,
-                        )
-                    }
-                    if (macInput.isBlank() && d.mac != null) macInput = d.mac
+                    g.settings.update { it.copy(baseUrl = d.baseUrl, networkMode = NetworkMode.SYSTEM) }
                     g.refreshModels("find")
                     applied = "Using ${d.baseUrl} over the system network."
                 }.padding(12.dp),
             ) {
                 Column {
                     Text(d.host)
-                    Hint(
-                        (d.model?.let { "Model: $it" } ?: if (d.needsKey) "Answers, but needs an API key" else "OpenAI-compatible server") +
-                            (d.mac?.let { " · $it" } ?: ""),
-                    )
+                    Hint(d.model?.let { "Model: $it" } ?: if (d.needsKey) "Answers, but needs an API key" else "OpenAI-compatible server")
                 }
             }
         }
@@ -111,21 +99,23 @@ fun FindSection(showPermission: Boolean = true) {
     }
     applied?.let { Hint(it) }
 
-    SectionTitle("Wake the Tiiny (Wake-on-LAN)")
-    Hint("Needs the Tiiny's MAC address (shown on the device or in your router) and Wake-on-LAN switched on for it. It usually only works over Ethernet, not Wi-Fi.")
+    SectionTitle("Power on the Tiiny (smart plug)")
+    Hint("The Tiiny has no Ethernet, so Wake-on-LAN is not possible. Plug its charger into a Wi-Fi smart plug with a local web API and save the plug's \"turn on\" address here. The Tiiny boots when it gets power.")
+    Hint("Shelly Plus / Gen2+ plug: http://<plug-ip>/rpc/Switch.Set?id=0&on=true   ·   Shelly Gen1: http://<plug-ip>/relay/0?turn=on   ·   Tasmota: http://<plug-ip>/cm?cmnd=Power%20On")
     OutlinedTextField(
-        value = macInput, onValueChange = { macInput = it }, singleLine = true,
-        label = { Text("MAC address, e.g. AA:BB:CC:DD:EE:FF") }, modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, autoCorrectEnabled = false),
-        isError = macInput.isNotBlank() && LanTools.parseMac(macInput) == null,
+        value = urlInput, onValueChange = { urlInput = it }, singleLine = true,
+        label = { Text("Power-on address (http://…)") }, modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false),
+        isError = urlInput.isNotBlank() && !LanTools.isHttpUrl(urlInput),
     )
     Row {
-        TextButton(enabled = macInput.trim() != s.wolMac, onClick = { g.settings.update { it.copy(wolMac = macInput.trim()) } }) { Text("Save") }
-        Button(enabled = !waking && LanTools.parseMac(macInput) != null, onClick = {
-            waking = true; wolMsg = "Sending …"
-            g.settings.update { it.copy(wolMac = macInput.trim()) }
-            scope.launch { wolMsg = wakeAndWatch(g, macInput); waking = false }
-        }) { Ico(io.github.jenziner.nisaba.R.drawable.ic_power, null); Text("  Wake Tiiny") }
+        TextButton(enabled = urlInput.trim() != s.powerOnUrl, onClick = { g.settings.update { it.copy(powerOnUrl = urlInput.trim()) } }) { Text("Save") }
+        Button(enabled = !powering && LanTools.isHttpUrl(urlInput), onClick = {
+            powering = true; powerMsg = "Sending …"
+            g.settings.update { it.copy(powerOnUrl = urlInput.trim()) }
+            scope.launch { powerMsg = powerOnAndWatch(g, urlInput); powering = false }
+        }) { Ico(io.github.jenziner.nisaba.R.drawable.ic_power, null); Text("  Power on") }
     }
-    wolMsg?.let { Hint(it) }
+    Hint("Only switches ON. Shut the Tiiny down on the device itself; cutting its power can damage its storage.")
+    powerMsg?.let { Hint(it) }
 }
