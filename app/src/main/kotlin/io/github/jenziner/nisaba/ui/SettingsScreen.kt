@@ -3,7 +3,6 @@ package io.github.jenziner.nisaba.ui
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,7 +55,7 @@ fun SettingsScreen(nav: Nav) {
             ctx.contentResolver.takePersistableUriPermission(uri, flags)
             val old = g.settings.current.folder
             g.settings.update { it.copy(folder = uri) }
-            if (old != null && old != uri) runCatching { ctx.contentResolver.releasePersistableUriPermission(old, flags) }
+            if (old != null && old != uri && old.scheme != "file") runCatching { ctx.contentResolver.releasePersistableUriPermission(old, flags) }
         }
     }
 
@@ -70,6 +69,8 @@ fun SettingsScreen(nav: Nav) {
     var searchTesting by remember { mutableStateOf(false) }
     var docLimit by remember { mutableStateOf(s.documentLimitTokens.toString()) }
     val scope = rememberCoroutineScope()
+    val tv = rememberIsTv()
+    var folderMsg by remember { mutableStateOf<String?>(null) }
 
     Page("Settings", onBack = { nav.pop() }) { pad ->
         ScrollColumn(pad) {
@@ -77,7 +78,24 @@ fun SettingsScreen(nav: Nav) {
             Hint(s.folder?.let { "Selected: ${it.lastPathSegment}" } ?: "No folder selected.")
             Hint("The app only gets access to this folder. All project data lives there only.")
             if (g.runningCount() > 0) ErrorText("Answers are still running. Changing the folder prevents them from being saved (different storage).")
-            OutlinedButton(onClick = { picker.launch(s.folder) }) { Ico(R.drawable.ic_folder, null); Text(if (s.folder == null) "  Choose folder" else "  Choose another folder") }
+            OutlinedButton(onClick = {
+                folderMsg = if (picker.tryLaunch(s.folder)) null
+                else "This device has no folder picker." + if (tv) " Use app storage instead." else ""
+            }) { Ico(R.drawable.ic_folder, null); Text(if (s.folder == null) "  Choose folder" else "  Choose another folder") }
+            if (tv) {
+                Hint("TVs usually have no folder picker. App storage keeps projects inside the app's own folder; remove the app and they are gone.")
+                OutlinedButton(onClick = {
+                    val dir = ctx.getExternalFilesDir("projects") ?: java.io.File(ctx.filesDir, "projects")
+                    dir.mkdirs()
+                    val old = s.folder
+                    g.settings.update { it.copy(folder = android.net.Uri.fromFile(dir)) }
+                    if (old != null && old.scheme != "file") runCatching {
+                        ctx.contentResolver.releasePersistableUriPermission(old, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    }
+                    folderMsg = null
+                }) { Ico(R.drawable.ic_folder, null); Text("  Use app storage") }
+            }
+            folderMsg?.let { ErrorText(it) }
 
             SectionTitle("Model server")
             LocalNetworkPermission(always = true)
@@ -209,7 +227,7 @@ fun SettingsScreen(nav: Nav) {
 
 @Composable
 private fun ModeRow(selected: Boolean, title: String, hint: String, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().focusClickable(onClick = onClick).padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         RadioButton(selected = selected, onClick = onClick)
         Column { Text(title); if (hint.isNotEmpty()) Hint(hint) }
     }

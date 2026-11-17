@@ -6,6 +6,13 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import io.github.jenziner.nisaba.ui.LocalIsTv
+import io.github.jenziner.nisaba.ui.TvSafePadding
+import io.github.jenziner.nisaba.ui.isTelevision
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import io.github.jenziner.nisaba.core.store.ProjectRef
@@ -43,7 +50,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { NisabaTheme { Root() } }
+        val tv = isTelevision(this)
+        setContent {
+            CompositionLocalProvider(LocalIsTv provides tv) { NisabaTheme { Root() } }
+        }
     }
 
     // Verbindungsüberwachung nur, solange die App sichtbar ist.
@@ -55,6 +65,7 @@ class MainActivity : ComponentActivity() {
 private fun Root() {
     val stack = remember { mutableStateListOf<Screen>(Screen.Home) }
     val nav = remember { Nav(stack) }
+    Box(if (LocalIsTv.current) Modifier.padding(TvSafePadding) else Modifier) {
     when (val s = nav.top) {
         Screen.Home -> HomeScreen(nav)
         Screen.Settings -> SettingsScreen(nav)
@@ -63,6 +74,7 @@ private fun Root() {
         is Screen.ProjectSettings -> ProjectSettingsScreen(nav, s.ref)
         is Screen.Soul -> SoulScreen(nav, s.ref)
         is Screen.Chat -> ChatScreen(nav, s.key)
+    }
     }
     // Der SOUL-Editor behandelt Zurück selbst (Rückfrage bei ungespeicherten Änderungen).
     if (nav.top !is Screen.Soul) {

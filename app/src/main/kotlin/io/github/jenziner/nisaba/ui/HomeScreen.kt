@@ -1,7 +1,6 @@
 package io.github.jenziner.nisaba.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +35,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -67,6 +70,10 @@ fun HomeScreen(nav: Nav) {
     fun go(s: Screen) { scope.launch { drawer.close() }; nav.push(s) }
 
     ModalNavigationDrawer(
+        modifier = Modifier.onPreviewKeyEvent { e ->
+            // Remote: the Menu button opens the project drawer.
+            if (e.key == Key.Menu && e.type == KeyEventType.KeyUp) { scope.launch { drawer.open() }; true } else false
+        },
         drawerState = drawer,
         drawerContent = {
             ModalDrawerSheet {
@@ -177,7 +184,7 @@ private fun DrawerContent(open: Boolean, go: (Screen) -> Unit) {
         }
         (projects as? StoreResult.Ok)?.value?.items?.sortedBy { it.project.name.lowercase() }?.forEach { ref ->
             Row(
-                Modifier.fillMaxWidth().clickable { go(Screen.Project(ref)) }.padding(start = 20.dp, end = 8.dp),
+                Modifier.fillMaxWidth().focusClickable { go(Screen.Project(ref)) }.padding(start = 20.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Ico(R.drawable.ic_folder, null, MaterialTheme.colorScheme.onSurfaceVariant, size = 20)
@@ -208,7 +215,7 @@ private fun DrawerContent(open: Boolean, go: (Screen) -> Unit) {
 @Composable
 private fun DrawerRow(icon: Int, text: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 14.dp),
+        Modifier.fillMaxWidth().focusClickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Ico(icon, null)

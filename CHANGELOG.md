@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Android TV:** launcher entry and banner, remote-friendly focus rings, Menu button opens the
+  drawer, TV safe-area margins. App storage (plain folder) for TVs without a folder picker.
+  Missing pickers no longer crash the app. See [docs/TV.md](docs/TV.md). Not yet tested on a TV.
+
 ## 1.0.0 – 2026-11-15
 
 - **Background answers:** a running answer (including web search and saving) continues when

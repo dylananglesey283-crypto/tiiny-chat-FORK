@@ -2,7 +2,6 @@ package io.github.jenziner.nisaba.ui
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.widthIn
@@ -293,7 +292,7 @@ private fun SaveToProjectDialog(onDismiss: () -> Unit, onPick: (ProjectStore, Pr
                     list != null && list.isEmpty() -> Hint("No projects yet. Create one from the menu first.")
                     list != null -> list.forEach { p ->
                         Row(
-                            Modifier.fillMaxWidth().clickable { store?.let { onPick(it, p) } }.padding(vertical = 10.dp),
+                            Modifier.fillMaxWidth().focusClickable { store?.let { onPick(it, p) } }.padding(vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Ico(R.drawable.ic_folder, null)
@@ -368,7 +367,7 @@ private fun StatusBlock(
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             if (project != null) {
-                IconBtn(R.drawable.ic_attach_file, "Upload document", enabled = !docBusy && !st.requestRunning) { upload.launch(arrayOf("*/*")) }
+                IconBtn(R.drawable.ic_attach_file, "Upload document", enabled = !docBusy && !st.requestRunning) { if (!upload.tryLaunch(arrayOf("*/*"))) docMsg = "This device has no file picker." }
             }
             when {
                 !st.isProject -> {}
@@ -479,7 +478,7 @@ private fun Sources(w: WebContext) {
         Hint("Web search: \"${w.query}\"" + if (w.results.isEmpty()) " · no results" else "")
         w.results.forEachIndexed { i, r ->
             Row(
-                Modifier.fillMaxWidth().clickable {
+                Modifier.fillMaxWidth().focusClickable {
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 }.padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,

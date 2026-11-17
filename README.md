@@ -74,6 +74,7 @@ identifiers `nisaba-*`). It is kept for compatibility with existing project fold
 - [Folder structure and file format](docs/DATA-FORMAT.md)
 - [Snapshot and reconnect logic](docs/SNAPSHOT-AND-RECONNECT.md)
 - [Setup on Pixel / GrapheneOS](docs/SETUP-PIXEL.md)
+- [Android TV](docs/TV.md)
 - [Build](docs/BUILD.md) and [Release signing](docs/RELEASE.md)
 - [Decisions](docs/DECISIONS.md)
 - [Test report 1.0](docs/TEST-REPORT-1.0.md)

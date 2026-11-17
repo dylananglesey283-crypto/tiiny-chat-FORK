@@ -1,6 +1,5 @@
 package io.github.jenziner.nisaba.ui
 
-import androidx.compose.foundation.clickable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.text.KeyboardOptions
@@ -131,7 +130,7 @@ fun ProjectSettingsScreen(nav: Nav, initial: ProjectRef) {
             message?.let { ErrorText(it) }
 
             Row(
-                Modifier.fillMaxWidth().clickable { nav.push(Screen.Soul(cur)) }.padding(vertical = 12.dp),
+                Modifier.fillMaxWidth().focusClickable { nav.push(Screen.Soul(cur)) }.padding(vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Ico(R.drawable.ic_edit_note, null)
@@ -191,7 +190,7 @@ fun ProjectSettingsScreen(nav: Nav, initial: ProjectRef) {
                     }
                 }
             }
-            OutlinedButton(enabled = !docBusy, onClick = { upload.launch(arrayOf("*/*")) }) {
+            OutlinedButton(enabled = !docBusy, onClick = { if (!upload.tryLaunch(arrayOf("*/*"))) docError = "This device has no file picker." }) {
                 Ico(R.drawable.ic_attach_file, null); Text(if (docBusy) "  Working …" else "  Upload document")
             }
             Hint("Text, Markdown, CSV, JSON, code, PDF (text layer only, no OCR) and DOCX. Max. 25 MB per file.")

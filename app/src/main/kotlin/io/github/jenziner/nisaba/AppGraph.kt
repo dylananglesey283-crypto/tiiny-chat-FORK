@@ -35,7 +35,9 @@ import io.github.jenziner.nisaba.net.LocalNetworkAccess
 import io.github.jenziner.nisaba.net.NetworkPaths
 import io.github.jenziner.nisaba.settings.KeyVault
 import io.github.jenziner.nisaba.settings.SettingsRepository
+import io.github.jenziner.nisaba.core.storage.FileStorageBackend
 import io.github.jenziner.nisaba.storage.SafStorageBackend
+import io.github.jenziner.nisaba.core.storage.StorageBackend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -94,17 +96,20 @@ class AppGraph(private val app: Application) {
     /** Für Sendevorgänge: überdauert Bildschirmwechsel. */
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private var storeFor: Pair<String, Pair<SafStorageBackend, ProjectStore>>? = null
+    private var storeFor: Pair<String, Pair<StorageBackend, ProjectStore>>? = null
 
     /** Projektdokumente (Hochladen, Textgewinnung, Laden für Anfragen). */
     val documents = Documents(app) { storage()?.second }
 
     /** Speicher des aktuell gewählten Ordners, oder null. */
-    fun storage(): Pair<SafStorageBackend, ProjectStore>? {
+    fun storage(): Pair<StorageBackend, ProjectStore>? {
         val uri = settings.current.folder ?: return null
         val key = uri.toString()
         storeFor?.let { if (it.first == key) return it.second }
-        val backend = SafStorageBackend(app.contentResolver, uri)
+        // file: = app-private folder (Android TV without a folder picker); otherwise a SAF tree.
+        val backend: StorageBackend =
+            if (uri.scheme == "file") FileStorageBackend(java.io.File(uri.path ?: return null))
+            else SafStorageBackend(app.contentResolver, uri)
         val pair = backend to ProjectStore(backend, env)
         storeFor = key to pair
         return pair

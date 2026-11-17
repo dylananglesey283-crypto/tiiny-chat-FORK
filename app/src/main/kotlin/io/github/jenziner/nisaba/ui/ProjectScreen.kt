@@ -1,6 +1,5 @@
 package io.github.jenziner.nisaba.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -72,8 +71,8 @@ fun ProjectScreen(nav: Nav, initial: ProjectRef) {
                     c.value.items.sortedByDescending { it.chat.createdAt }.forEach { ref ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(
-                                Modifier.weight(1f).clickable(enabled = !busy) {
-                                    g.existingFor(ref)?.let { nav.push(Screen.Chat(it.key)); return@clickable }
+                                Modifier.weight(1f).focusClickable(enabled = !busy) {
+                                    g.existingFor(ref)?.let { nav.push(Screen.Chat(it.key)); return@focusClickable }
                                     busy = true
                                     scope.launch {
                                         val st = g.storage()
