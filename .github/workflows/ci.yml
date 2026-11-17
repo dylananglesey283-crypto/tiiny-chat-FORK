@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,4 +31,10 @@ jobs:
         with:
           name: test-report
           path: core/build/reports/tests/test/
+          if-no-files-found: ignore
+      - name: Debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: ignore

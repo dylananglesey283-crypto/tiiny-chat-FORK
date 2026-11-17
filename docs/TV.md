@@ -26,3 +26,14 @@ Tiiny.
 Not built or run on a real TV or emulator yet. Please check on an Android TV emulator or device:
 focus order in chat (input field, send button, menu), typing with the on-screen keyboard, and
 the banner.
+
+## Getting it onto a TV
+
+1. On GitHub: **Actions → CI → Run workflow**, pick the branch, then download the `debug-apk`
+   artifact from the finished run (unzip it to get `app-debug.apk`).
+2. Install it on the TV by one of these:
+   - **Downloader app** (from the TV's app store): enter a link to the APK and install. Allow
+     "install unknown apps" for Downloader when asked.
+   - **ADB over Wi-Fi:** enable developer options and network debugging on the TV, then
+     `adb connect <tv-ip>:5555` and `adb install app-debug.apk`.
+   - **USB stick** with a file manager app on the TV.
