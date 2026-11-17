@@ -90,6 +90,8 @@ class AppGraph(private val app: Application) {
     val keys = KeyVault(app)
     val paths = NetworkPaths(app)
     val localNet = LocalNetworkAccess(app)
+    val discovery = io.github.jenziner.nisaba.net.Discovery(app)
+    val wol = io.github.jenziner.nisaba.net.WakeOnLan(app, discovery)
     val log = ConnectionLog()
     val api = ConfiguredApi(settings, keys, paths, localNet, log)
 

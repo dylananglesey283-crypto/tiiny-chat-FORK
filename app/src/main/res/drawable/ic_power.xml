@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols Outlined "power_settings_new", Apache License 2.0, https://github.com/google/material-design-icons -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="960" android:viewportHeight="960">
+    <group android:translateY="960">
+        <path android:fillColor="#FF000000" android:pathData="M440-440v-400h80v400h-80Zm40 320q-74 0-139.5-28.5T226-226q-49-49-77.5-114.5T120-480q0-80 33-151t93-123l56 56q-48 40-73.5 96.5T200-480q0 117 81.5 198.5T480-200q117 0 198.5-81.5T760-480q0-64-25.5-120.5T661-697l56-56q60 52 93.5 123T844-480q0 74-28.5 139.5t-77 114.5q-48.5 49-114 77.5T480-120Z" />
+    </group>
+</vector>

@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ import io.github.jenziner.nisaba.ModelStatus
 import io.github.jenziner.nisaba.Nav
 import io.github.jenziner.nisaba.R
 import io.github.jenziner.nisaba.Screen
+import io.github.jenziner.nisaba.core.net.LanTools
 import io.github.jenziner.nisaba.core.store.Listing
 import io.github.jenziner.nisaba.core.store.ProjectRef
 import io.github.jenziner.nisaba.core.store.StoreResult
@@ -44,6 +46,7 @@ import io.github.jenziner.nisaba.graph
 import io.github.jenziner.nisaba.settings.NetworkMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -59,6 +62,9 @@ fun DashboardScreen(nav: Nav) {
     var status by remember { mutableStateOf<StoreStatus?>(null) }
     var projects by remember { mutableStateOf<StoreResult<Listing<ProjectRef>>?>(null) }
     var reload by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    var waking by remember { mutableStateOf(false) }
+    var wakeMsg by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) { if (model == ModelStatus.Unknown) g.refreshModels("dashboard") }
     LaunchedEffect(settings.folder, reload) {
@@ -125,6 +131,16 @@ fun DashboardScreen(nav: Nav) {
                 Tile(R.drawable.ic_settings, "Settings", enabled = true) { nav.push(Screen.Settings) }
                 Tile(R.drawable.ic_bug_report, "Diagnostics", enabled = true) { nav.push(Screen.Diagnostics) }
             }
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Tile(R.drawable.ic_search, "Find Tiiny", enabled = true) { nav.push(Screen.Find) }
+                Tile(R.drawable.ic_power, "Wake Tiiny", enabled = !waking && LanTools.parseMac(settings.wolMac) != null) {
+                    waking = true; wakeMsg = "Sending …"
+                    scope.launch { wakeMsg = wakeAndWatch(g, settings.wolMac); waking = false }
+                }
+            }
+            if (settings.wolMac.isBlank()) Hint("Wake Tiiny needs the Tiiny's MAC address: open Find Tiiny to enter it.")
+            wakeMsg?.let { Hint(it) }
 
             SectionTitle("Projects")
             val list = (projects as? StoreResult.Ok)?.value?.items

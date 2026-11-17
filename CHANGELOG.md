@@ -5,6 +5,7 @@
 - **Android TV:** launcher entry and banner, remote-friendly focus rings, Menu button opens the
   drawer, TV safe-area margins. App storage (plain folder) for TVs without a folder picker.
   Missing pickers no longer crash the app. See [docs/TV.md](docs/TV.md). Dashboard start screen on TVs.
+  **Find Tiiny** (network scan of the local /24 for the Tiiny's API) and **Wake-on-LAN**.
   Not yet tested on a TV.
 
 ## 1.0.0 – 2026-11-15

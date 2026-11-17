@@ -117,6 +117,8 @@ fun SettingsScreen(nav: Nav) {
                 g.settings.update { it.copy(networkMode = NetworkMode.SYSTEM) }
             }
 
+            FindSection(showPermission = false)
+
             SectionTitle("API key")
             Hint(if (hasKey) "A key is stored (encrypted with the Android Keystore)." else "No key stored.")
             OutlinedTextField(

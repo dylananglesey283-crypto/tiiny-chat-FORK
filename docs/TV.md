@@ -30,6 +30,20 @@ Not built or run on a real TV or emulator yet. Please check on an Android TV emu
 focus order in chat (input field, send button, menu), typing with the on-screen keyboard, and
 the banner.
 
+## Finding and waking the Tiiny
+
+- **Find Tiiny** (dashboard tile, also in Settings → Model server): probes the other 253 addresses
+  of the TV's own /24 network with a single `GET /v1/models` on port 80 (short timeouts, no API
+  key sent) and lists hosts that answer like an OpenAI-compatible server. Selecting one sets the
+  base address and switches to the system network. Needs the local network permission on
+  Android 17.
+- **Wake Tiiny** (dashboard tile): sends a Wake-on-LAN magic packet (UDP broadcast, ports 9 and 7)
+  to the MAC address saved under Find Tiiny, then checks the connection for about a minute.
+  Android does not let apps read other devices' MAC addresses, so you enter it once (shown on the
+  Tiiny or in your router's device list).
+- Limits: only works if the Tiiny supports Wake-on-LAN, has it switched on, and is on the same
+  network, usually over Ethernet. Only /24 networks are scanned. Not tested with a real Tiiny.
+
 ## Getting it onto a TV
 
 1. On GitHub: **Actions → CI → Run workflow**, pick the branch, then download the `debug-apk`

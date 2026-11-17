@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import io.github.jenziner.nisaba.core.store.ProjectRef
 import io.github.jenziner.nisaba.ui.ChatScreen
 import io.github.jenziner.nisaba.ui.DashboardScreen
+import io.github.jenziner.nisaba.ui.FindScreen
 import io.github.jenziner.nisaba.ui.DiagnosticsScreen
 import io.github.jenziner.nisaba.ui.NisabaTheme
 import io.github.jenziner.nisaba.ui.ProjectScreen
@@ -31,6 +32,7 @@ sealed interface Screen {
     data object Home : Screen
     /** TV start screen: status overview, tiles and projects. */
     data object Dashboard : Screen
+    data object Find : Screen
     data object Settings : Screen
     data object Diagnostics : Screen
     data class Project(val ref: ProjectRef) : Screen
@@ -73,6 +75,7 @@ private fun Root() {
     when (val s = nav.top) {
         Screen.Dashboard -> DashboardScreen(nav)
         Screen.Home -> HomeScreen(nav)
+        Screen.Find -> FindScreen(nav)
         Screen.Settings -> SettingsScreen(nav)
         Screen.Diagnostics -> DiagnosticsScreen(nav)
         is Screen.Project -> ProjectScreen(nav, s.ref)
