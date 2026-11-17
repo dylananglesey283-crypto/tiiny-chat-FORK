@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Dashboard device card (Tiiny Pocket specs) and a memory hint next to the document limit.
 - **Android TV:** launcher entry and banner, remote-friendly focus rings, Menu button opens the
   drawer, TV safe-area margins. App storage (plain folder) for TVs without a folder picker.
   Missing pickers no longer crash the app. See [docs/TV.md](docs/TV.md). Dashboard start screen on TVs.

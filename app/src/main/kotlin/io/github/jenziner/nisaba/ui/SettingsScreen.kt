@@ -203,6 +203,7 @@ fun SettingsScreen(nav: Nav) {
                 TextButton(enabled = parsed != null && parsed != s.documentLimitTokens, onClick = { g.settings.update { it.copy(documentLimitTokens = parsed!!) } }) { Text("Apply") }
                 TextButton(onClick = { docLimit = AppSettings.DEFAULT_DOCUMENT_LIMIT.toString() }) { Text("Default (100'000)") }
             }
+            Hint("Tiiny Pocket: 80 GB of memory is shared by the model and its context. With a very large model (up to 120B) a long context competes with the model for memory, so if requests get slow or fail, lower this value.")
             g.contextWindow()?.let { Hint("The current model reports ${swissInt(it)} tokens context → limit ${swissInt(it / 2)} tokens.") }
 
             SectionTitle("General app instructions")

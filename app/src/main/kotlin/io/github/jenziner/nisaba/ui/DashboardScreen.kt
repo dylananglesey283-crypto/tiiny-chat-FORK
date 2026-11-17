@@ -121,6 +121,14 @@ fun DashboardScreen(nav: Nav) {
                 )
             }
 
+            Spacer(Modifier.height(12.dp))
+            // Fixed text from the Tiiny Pocket spec sheet; the app cannot read these values from the device.
+            InfoCard(
+                "Device (spec sheet)", "Tiiny Pocket · runs models up to 120B",
+                "80 GB RAM (32 GB SoC + 48 GB dNPU) · 190 TOPS (30 SoC + 160 dNPU) · 30 W TDP · 1 TB NVMe SSD",
+                null, Modifier.fillMaxWidth(),
+            )
+
             SectionTitle("Start")
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Tile(R.drawable.ic_send, "Chat", enabled = true) { nav.push(Screen.Home) }
